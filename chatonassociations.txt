@@ -1,0 +1,52 @@
+(12:59:06 PM) luke.isla@gmail.com/60385149: rails questions:  I'm making an app with two tables. Is it better to reference two tables to extract the data I need, or have some data duplication across the tables in order to only have to reference one table? 
+(12:59:43 PM) Lance Sanchez: failed to parse, do you know what normal form is?
+(01:00:04 PM) luke.isla@gmail.com/60385149: I do not
+(01:00:24 PM) Lance Sanchez: ok, what are the tables called?
+(01:01:33 PM) luke.isla@gmail.com/60385149: moonData and posDetails, they have overlap in several columns including:  Region | Constellation | System | Security Level | Planet | Moon | Tower Corporation | Tower Type | Tower State | State Ends 
+(01:01:39 PM) luke.isla@gmail.com/60385149: or roughly 50% of each table's columns.
+(01:01:54 PM) Lance Sanchez: normalise your data
+(01:02:21 PM) Lance Sanchez: so for one you dont need all the data
+(01:02:45 PM) Lance Sanchez: Region has many constellations, constellations has many systems
+(01:03:16 PM) Lance Sanchez: i know eve doesnt do it that way but really you dont care
+(01:03:43 PM) luke.isla@gmail.com/60385149: I intend to allow heavy dynamic filtering by the user. So I figured putting that data in the database would speed up the filtering process because I strip out a lot of logic that would otherwise be necessary.
+(01:03:58 PM) Lance Sanchez: you can argue that planet and moon could also be tables but that may be excessive
+(01:04:16 PM) Lance Sanchez: ya but you can get that an more by doing it through relations
+(01:04:34 PM) Lance Sanchez: also tower type, tower corporations should be tables
+(01:04:54 PM) Lance Sanchez: state and state ends are attributes
+(01:04:57 PM) Lance Sanchez: but back up a sec
+(01:05:18 PM) Lance Sanchez: eve keeps them as foreign keys do you know how to use them?
+(01:05:43 PM) luke.isla@gmail.com/60385149: not yet. I assumed I would have to work with their database dumps to compare and extract the relevant data that I need.
+(01:05:54 PM) Lance Sanchez: sorta not really
+(01:06:04 PM) Lance Sanchez: do you know what a foreign key is?
+(01:06:42 PM) luke.isla@gmail.com/60385149: it's how databases link from one table to another isn't it? Foreign because it's out of the table and key because it's a key to a cell.
+(01:06:59 PM) luke.isla@gmail.com/60385149: woot! wikipedia says I got that right!
+(01:07:00 PM) Lance Sanchez: ok so we are dealing with rails
+(01:07:11 PM) Lance Sanchez: so lets start there because this will make your life easier
+(01:07:17 PM) Lance Sanchez: and your sql faster
+(01:07:57 PM) Lance Sanchez: so lets say you have a rails model, People
+(01:08:10 PM) Lance Sanchez: err User
+(01:08:21 PM) Lance Sanchez: User has an ID, a Name and a few other columns
+(01:08:50 PM) Lance Sanchez: ....
+(01:08:51 PM) Lance Sanchez: damn it
+(01:09:02 PM) Lance Sanchez: trying to think of an easy way to explain this
+(01:09:07 PM) Lance Sanchez: that isnt a join table
+(01:09:11 PM) Lance Sanchez: look you have corps
+(01:09:15 PM) Lance Sanchez: you have alliances
+(01:09:19 PM) Lance Sanchez: and you have pilots
+(01:09:39 PM) Lance Sanchez: an alliance has many corps, so the corp table has a alliance_id column
+(01:10:15 PM) Lance Sanchez: and in rails the alliance has_many corps and the corp belonds_to alliance
+(01:11:16 PM) Lance Sanchez: Corp.join(:alliance).where(:alliance => {:name => "TEST"}).all
+(01:11:32 PM) Lance Sanchez: that would give you all the corps that belong to the alliance test
+(01:11:34 PM) Lance Sanchez: make sense?
+(01:11:43 PM) luke.isla@gmail.com/60385149: Yes
+(01:12:38 PM) luke.isla@gmail.com/60385149: So on the database side, you've built two separate tables, one for alliance and one for corporation. You've then joined them with your Corp.join to extract the member corps of TEST alliance.
+(01:12:49 PM) Lance Sanchez: yes
+(01:13:19 PM) Lance Sanchez: this way you only have the info about TEST once and any time you need to use it somewhere else you can reference it by its id
+(01:13:35 PM) Lance Sanchez: so if you have to update tests info you only need to do it in one place
+(01:14:23 PM) Lance Sanchez: and when searching you only search the alliance name table once for "TEST" then use the index on the alliance_id on corp to find all the corps
+(01:14:53 PM) Lance Sanchez: its faster, and the larger the dataset the more of an advantage you'll get
+(01:15:31 PM) Lance Sanchez: make sense
+(01:16:32 PM) Lance Sanchez: ?
+(01:16:45 PM) luke.isla@gmail.com/60385149: Sorry, doing git push stuff, still rusty on my git foo, reading now.
+(01:16:59 PM) luke.isla@gmail.com/60385149: Yes, makes sense.
+(01:17:53 PM) luke.isla@gmail.com/60385149: May I copy this chat and add it to my public repo? I'd like to have it archived somewhere I'll know to check when I get down to actually implementing this.
